@@ -1,0 +1,205 @@
+{% load static %} 
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <title>Plant Prediction</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'predictor/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.3/css/bootstrap.min.css">
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: white;
+        background-image: url("{% static 'images/pexels-veeterzy-38136.png' %}");
+        color: #74AF6E;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        font-size: 30px;  /* Decreased global font size */
+      }
+      .container {
+        max-width: 900px;
+        margin: auto;
+        padding: 1em;
+        width :600px;
+        background-color: white;
+        border-radius: 5px;
+        text-align: center;
+        box-shadow: 0px 2px 7px 2px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        align-items: stretch; /* Adjusted property to stretch content horizontally */
+        justify-content: center;
+      }
+      .form-control, .form-select {
+        border-radius: 5px;
+        border: 1px solid #74AF6E;
+        color: #74AF6E;
+        background-color: white;
+        height: 30px;  /* Decreased input field height */
+        font-size: 20px;  /* Decreased input field font size */
+      }
+      .btn-primary, .btn-secondary {
+        background-color: #62975C;
+        color: white;
+        padding: 5px 10px;  /* Decreased button padding */
+        font-size: 18px;  /* Decreased button font size */
+      }
+      .btn-primary{
+        font-size: 25px;
+        background-color: orange ;
+      }
+      .card-img-top {
+        height: 150px;  /* Decreased image height */
+        object-fit: cover;
+        border-radius: 5px;
+      }
+      .card {
+        border: none;
+        box-shadow: 0px 2px 7px 2px rgba(0,0,0,0.1);
+      }
+      .col {
+        margin-bottom: 1em;  /* Decreased column bottom margin */
+      }
+      h1 {
+        font-size: 48px; /* Adjust size as needed */
+        color: #74AF6E;
+    }
+      h2 {
+        font-size: 24px; 
+        color: #74AF6E; /* Decreased heading font size */
+      }
+      
+
+      #image_file {
+        display: none;
+      
+    }
+    .file-container {
+      position: relative;
+      display: inline-block;
+      font-size: 12px;
+      color: black;
+    }
+    
+    .file-container input[type="file"] {
+      display: none;
+    }
+    
+    .file-container label {
+      padding: 10px;
+      background-color: #74AF6E;
+      color: white;
+      cursor: pointer;
+    }
+    label[for="image_file"] {
+        cursor: pointer;
+        display: inline-block;
+        background-color: #62975C;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        margin-bottom: 1em;
+    }
+    .form-label {
+      font-size: 12px;  /* Decreased label font size */
+      color: black;  /* Changed label color to black */
+  }
+ 
+    #file-name {
+        color: #74AF6E;
+    }
+
+    .logo {
+      max-width: 200px;
+      
+  }
+  </style>
+
+</head>
+  <body>
+    <div class="container">
+       <div class="text-center">
+        <img src="{% static 'images/logo.jpg' %}" alt="Logo" class="logo">
+       </div>
+        <h1 class="text-center">Plant Prediction</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="plant_type" class="form-label"></label>
+                <select name="plant_type" id="plant_type" class="form-select" required>
+                    <option value="" disabled selected>Select a plant type</option>
+                    <option value="Paper">Pepper</option>
+                    <option value="Corn">Corn</option>
+                    <option value="Peach">Peach</option>
+                    <option value="Grape">Grape</option>
+                    <option value="Apple">Apple</option>
+                    <option value="Cherry">Cherry</option>
+                    <option value="Strawberry">Strawberry</option>
+                    <option value="Olive">Olive</option>
+                    <option value="Potato">Potato</option>
+                    <option value="Tomato">Tomato</option>
+
+                </select>
+            </div>
+            <div class="mb-3">
+              <div class="file-container">
+                <input type="file" name="image_file" id="image_file" required onchange="updateFileName(this)">
+                <label for="image_file">Choose a file</label>
+                <span id="file-name">No file chosen</span>
+              </div>
+            </div>
+            
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary">Predict</button>
+            </div>
+        </form>
+
+        <h2 class="text-center mt-4">Previously Predicted</h2>
+        {% if photos %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for photo in photos %}
+                {% if forloop.last %}
+                    <div class="col">
+                        <div class="card">
+                            <img src="{{ photo.image.url }}" alt="Photo" class="card-img-top">
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center mt-4">No photos found.</p>
+    {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{% url 'photo_list' %}" class="btn btn-secondary">Go to Photo List</a>
+        </div>
+    </div>
+    <script>
+      document.querySelector("#image_file").addEventListener('change', function() {
+          document.querySelector("#file-name").textContent = this.files[0].name;
+      });
+  </script>
+  <script>
+    function updateFileName(inputElement) {
+      var fileNameElement = document.getElementById('file-name');
+      if (inputElement.files.length > 0) {
+        fileNameElement.textContent = inputElement.files[0].name;
+      } else {
+        fileNameElement.textContent = 'No file chosen';
+      }
+    }
+    </script>
+    
+  
+
+</body>
+   
+
+</html>
+
